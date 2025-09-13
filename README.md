@@ -1,288 +1,391 @@
 # 🐍 viper
 
-**Hyperliquid 기반 공동 스테이킹 및 수수료 할인 플랫폼**
+**Hyperliquid Spot Orderbook Router for EVM DEX Aggregators + LST Vault**
 
-hyper + VIP -> 고액 스테이킹자만 누릴 수 있던 혜택을 풀(pool) 구조로 확장하여 VIP 경험을 다수 유저가 공유할 수 있게 한다.  
-viper는 Hyperliquid의 hype staking 시스템의 높은 진입장벽을 낮추고, 여러 스테이커가 하나의 vault 계정에 모여 수수료 할인 혜택을 공유할 수 있는 플랫폼입니다. vault 계정을 통해 swap 주문을 대행하여 사용자에게 더 저렴한 수수료 환경을 제공하며, 차익 수수료와 스테이킹 이자를 참여자들에게 비율대로 분배합니다.
+**hyper + VIP →** 고액 스테이킹자만 누리던 혜택과 오더북 기반의 **더 나은 가격/체결 경험**을 풀(pool) 구조로 확장해 **다수 유저가 공유**할 수 있게 합니다.
+viper는 **EVM의 DEX Aggregator가 Hyperliquid의 spot 오더북을 라우팅**하도록 돕는 **Router/Wrapper + Core Swap Agent**를 제공하고, 선택적으로 **HYPE 스테이킹 LST(Vault)** 를 통해 수익을 투명 분배합니다.
+목표는 **EVM↔Hyper spot 간 시세 괴리(arb 마진) 축소** 및 **일반 사용자의 체감 가격 개선**입니다.
+
+---
+
+## ✨ TL;DR
+
+* **3요소 아키텍처**
+
+  1. **HyperCore Swap Agent**: 페어별 **서브어카운트**로 입금 감지→즉시 스왑→재전송
+  2. **HyperEVM Router/Wrapper**(corewriter 기반): `getQuote`/`swapExactIn` 제공 → **Aggregator가 쉽게 통합**
+  3. **Viper Vault(LST)**: **HYPE 스테이킹 + 스왑 수익 일부 공유**(선택)
+* **사용자 이득 우선**: 프로토콜 캡쳐 수수료(bps)에 \*\*상한(cap)\*\*을 두고, 초과분은 **가격 개선으로 환원**
+* **개발자 친화**: ABI/이벤트/예제, `/api/docs` 제공(스웨거), Quote TTL/슬리피지/부분체결 정책 명확화
+
+---
 
 ## 🚀 빠른 시작
 
-### 1. 사전 요구사항
+### 1) 사전 요구사항
+
+* **Node.js** LTS(권장 v18+ / v20+)
+* **pnpm**
+* **PostgreSQL 17**
+* (선택) **HyperEVM RPC** 엔드포인트, 테스트 지갑
 
 #### pnpm 설치
 
 ```bash
-# npm을 통해 pnpm 설치
 npm install -g pnpm
-
-# 또는 curl을 통해 설치
+# 또는
 curl -fsSL https://get.pnpm.io/install.sh | sh -
-
-# 설치 확인
 pnpm --version
 ```
 
 #### PostgreSQL 설치
 
-**macOS (Homebrew 사용):**
+**macOS(Homebrew)**
 
 ```bash
-# PostgreSQL 설치
 brew install postgresql@17
-
-# PostgreSQL 서비스 시작
 brew services start postgresql@17
-
-# PostgreSQL 접속 (기본 사용자로)
 psql postgres
 ```
 
-**Windows:**
+**Windows**
 
-- [PostgreSQL 공식 사이트](https://www.postgresql.org/download/windows/)에서 설치 프로그램 다운로드
-- 설치 과정에서 비밀번호 설정
+* [PostgreSQL 공식 사이트](https://www.postgresql.org/download/windows/)에서 설치 후 비밀번호 설정
 
-### 2. 데이터베이스 설정
-
-PostgreSQL에 접속한 후 데이터베이스를 생성합니다:
+### 2) 데이터베이스 설정
 
 ```sql
--- 데이터베이스 생성
 CREATE DATABASE viper;
-
--- 사용자 생성 (선택사항)
 CREATE USER viper_user WITH ENCRYPTED PASSWORD 'your_password';
-
--- 권한 부여
 GRANT ALL PRIVILEGES ON DATABASE viper TO viper_user;
-
--- 접속 확인
 \c viper
 ```
 
-### 3. 프로젝트 설정
+### 3) 프로젝트 설정
 
-#### 환경 변수 설정
-
-`apps/api`와 `apps/web/` 각 폴더안의 `.env.example` 파일을 참고하여 `.env` 파일을 생성하여 환경 변수를 설정합니다.
+#### 환경 변수 템플릿 복사
 
 ```bash
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-#### 의존성 설치
+#### (권장) 환경 변수 예시
 
-```bash
-# 모든 패키지 설치
-pnpm install
+> 실제 키/주소는 상황에 맞게 교체하세요. 절대 저장소에 커밋하지 마세요.
+
+**`apps/api/.env`**
+
+```env
+# 서버
+NODE_ENV=development
+PORT=4000
+
+# DB 접속(둘 중 하나 방식 사용)
+DATABASE_URL=postgresql://viper_user:your_password@localhost:5432/viper
+# 또는 TypeORM 개별 설정 사용 시:
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_USER=viper_user
+# DB_PASS=your_password
+# DB_NAME=viper
+
+# HyperEVM / Router
+HYPER_EVM_RPC_URL=https://<your-hyperevm-rpc>
+ROUTER_ADDRESS=0xYourRouterAddress    # 배포 후 입력
+VAULT_ADDRESS=0xYourVaultAddress      # (선택) 배포 후 입력
+EXECUTOR_PRIVATE_KEY=0x...            # 실행/서명용(보관 주의)
+
+# Quote/실행 파라미터(예시 기본값)
+QUOTE_TTL_MS=3000                     # quote 유효시간(ms)
+DEFAULT_SLIPPAGE_BPS=50               # 0.50%
+MAX_IMPACT_BPS=100                    # 1.00% (체결 충격 상한)
+ALLOW_PARTIAL_FILL=false
+PAIR_ALLOWLIST=USDC,BTC,ETH           # 지원 페어 토큰 심볼(예시)
+
+# Swagger
+SWAGGER_ENABLE=true
 ```
 
-#### 프로젝트 빌드
+**`apps/web/.env`**
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+NEXT_PUBLIC_CHAIN_ID=XXXX            # HyperEVM 체인ID (배포 후 기입)
+NEXT_PUBLIC_ROUTER_ADDRESS=0xYourRouterAddress
+# (선택) WalletConnect/Wagmi 등 사용 시
+# NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
+```
+
+#### 의존성 설치 & 빌드
 
 ```bash
-# 전체 프로젝트 빌드
+pnpm install
 pnpm build
-
-# 개별 앱 빌드
+# 또는 개별
 pnpm --filter api build
 pnpm --filter web build
 ```
 
-### 4. 애플리케이션 실행
+### 4) 애플리케이션 실행
 
-#### 개발 모드로 실행
+#### 개발 모드
 
 ```bash
-# 전체 애플리케이션 실행 (백엔드 + 프론트엔드)
 pnpm dev
-
-# 개별 실행
-pnpm --filter api dev    # 백엔드만 실행 (포트 4000)
-pnpm --filter web dev    # 프론트엔드만 실행 (포트 3000)
+# 또는
+pnpm --filter api dev    # 포트 4000
+pnpm --filter web dev    # 포트 3000
 ```
 
-#### 프로덕션 모드로 실행
+#### 프로덕션 모드
 
 ```bash
-# 빌드 후 실행
 pnpm build
 pnpm start
 ```
 
-#### 데이터베이스 초기 세팅
+### 5) 데이터베이스 초기 세팅
 
-**⚠️ 중요: 최초 실행 시에만 수행**
+> ⚠️ **최초 1회만** 수행하고, 이후에는 비활성화 하세요.
 
-처음 프로젝트를 실행할 때 데이터베이스 테이블을 자동으로 생성하기 위해 `synchronize: true` 설정을 활성화해야 합니다.
+`apps/api/src/app.module.ts` TypeORM 설정:
 
-`apps/api/src/app.module.ts` 파일에서 TypeORM 설정을 다음과 같이 수정합니다:
-
-```typescript
-// apps/api/src/app.module.ts
+```ts
 TypeOrmModule.forRootAsync({
   imports: [ConfigModule],
   useFactory: (configService: ConfigService) => ({
-    ...
-    synchronize: true, // ⭐ 최초 실행 시 true로 설정
+    // ...
+    synchronize: true, // ⭐ 최초 실행 시에만 true
+    // autoLoadEntities: true, 등
   }),
   inject: [ConfigService],
-}),
+});
 ```
 
-**📝 주의사항:**
+* `synchronize: true`는 엔티티 기준으로 스키마를 자동 생성/수정합니다.
+* **프로덕션에서는 절대 사용하지 마세요.** 초기 테이블 생성 후에는 `false`로 변경하세요.
 
-- `synchronize: true`는 엔티티 정의를 기반으로 데이터베이스 스키마를 자동으로 생성/수정합니다
-- **프로덕션 환경에서는 절대 사용하지 마세요** (데이터 손실 위험)
-- 테이블이 생성된 후에는 `synchronize: false`로 변경해야합니다.
+### 6) 접속 확인
 
-### 5. 접속 확인
+* **웹**: [http://localhost:3000](http://localhost:3000)
+* **API**: [http://localhost:4000](http://localhost:4000)
+* **API 문서(Swagger)**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
 
-- **프론트엔드**: http://localhost:3000
-- **백엔드 API**: http://localhost:4000
-- **API 문서**: http://localhost:4000/api/docs (Swagger)
+---
 
 ## 📁 프로젝트 구조
 
 ```
 viper.money/
 ├── apps/
-│   ├── api/                    # NestJS 백엔드
+│   ├── api/                    # NestJS 백엔드 (Quote Cache/Orchestrator/Indexer)
 │   │   ├── src/
 │   │   └── package.json
-│   └── web/                   # Next.js 프론트엔드
+│   └── web/                    # Next.js 프론트엔드 (Landing/Swap/Vault/Profile/Developers)
 │       ├── app/
-│       ├── components/        # 공통 컴포넌트
+│       ├── components/
 │       └── package.json
 ├── packages/
-│   ├── ui/                    # 공통 UI 컴포넌트 (shadcn/ui)
-│   ├── eslint-config/         # ESLint 설정
-│   └── typescript-config/     # TypeScript 설정
+│   ├── ui/                     # 공통 UI 컴포넌트 (shadcn/ui)
+│   ├── eslint-config/
+│   └── typescript-config/
 └── docs/
-    └── PRD.md                 # 프로젝트 요구사항 문서
+    ├── PRD.md                  # (v0.2) Aggregator-first 개정본
+    └── INTEGRATION.md          # (선택) 통합 가이드/예제 모음
 ```
 
-## 🎯 주요 기능
+---
 
-### 1. Vault 시스템
+## 🎯 핵심 기능
 
-- 다수의 사용자가 hype 코인을 공동 스테이킹하여 하나의 vault 계정에서 수수료 할인 혜택 획득
-- 스테이킹 수익 및 vault 수수료 차익을 비율에 따라 분배
-- staking/un-staking 및 분배 내역 투명 기록
+### 1) **HyperEVM Router/Wrapper (스마트컨트랙트)**
 
-### 2. Swap 모듈
+* corewriter 응용. **DEX Aggregator 친화적 인터페이스** 제공
+* 표준형 메서드(요약):
 
-- 사용자 swap 요청 시 vault 계정이 대행 주문 실행
-- HyperCore Swap 모듈을 viper에서 래핑하여 호출
-- 낮은 수수료로 거래 가능
-- vault 계정의 fee discount와 실제 수수료율 차이를 수익화
+```solidity
+function getQuote(
+  address tokenIn,
+  address tokenOut,
+  uint256 amountIn
+) external view returns (
+  uint256 amountOut,
+  uint32  feeBps,      // 프로토콜 캡쳐 상한
+  uint64  validUntil,  // 만료 타임스탬프
+  bytes32 quoteId
+);
 
-### 3. 수익 분배
+function swapExactIn(
+  bytes32 quoteId,
+  uint256 amountIn,
+  uint256 minAmountOut,
+  address receiver,
+  bool allowPartialFill
+) external payable returns (uint256 amountOut);
+```
 
-- **스테이킹 이자**: Hyperliquid의 staking reward를 vault 참여자에게 분배
-- **차익 수수료**: swap 대행을 통한 fee discount 차익을 vault 참여자에게 비율대로 분배
+* **정책**: Quote TTL, 슬리피지 상한, 부분체결 허용 여부를 매개변수로 **거의-원자적 실행** UX 제공
+* **이벤트 예시**: `QuoteCreated`, `SwapExecuted`, `SwapPartiallyFilled`, `SwapReverted`, `FeeCaptured`, `Rebalance`
 
-### 4. 지갑 연결 인증
+### 2) **HyperCore Swap Agent**
 
-- 별도 회원가입 없이 지갑 연결을 통한 식별 및 참여
-- HyperEVM 지갑 지원
+* **페어별 서브어카운트**로 입금 감지 → 정책(IOC/TWAP, 가격 상한, 부분체결 등)에 따라 **즉시 스왑** → **재전송**
+* **재고/리스크 관리**: 페어별 체결 충격 상한/최대 체결량/재고 한도, 자동 리밸런싱
 
-## 📄 페이지 구성
+### 3) **Viper Vault (LST, 선택)**
 
-1. **Landing Page (Home)**
+* **HYPE 스테이킹 → stHYPE 민팅**
+* 수익 원천: (a) 스테이킹 리워드 (b) 스왑 실행 캡쳐 수익 일부 (c) (존재 시) 메이커 리베이트
+* **자동화**: Deposit/Withdraw & Stake/Unstake를 corewriter로 처리, 분배 투명화
 
-   - viper 소개 및 핵심 가치 (VIP 경험 공유)
-   - vault 참여/스왑 기능 안내
-   - CTA: "Connect Wallet", "Join Vault"
+---
 
-2. **Swap Page**
+## 🧩 Aggregator 통합 가이드 (요약)
 
-   - vault 계정을 통한 대행 swap UI
-   - 현재 수수료율 및 할인율 표시
-   - 예상 슬리피지 및 체결내역 확인
+1. **Router 주소/체인ID** 확인
+2. **`getQuote`** 호출 → `(amountOut, feeBps, validUntil, quoteId)` 수신
+3. Quote 유효시간 내에 **`swapExactIn`** 실행 (`minAmountOut`/`allowPartialFill` 정책 적용)
+4. 체결 성공 시 **receiver**가 `tokenOut` 수령
 
-3. **Vault Page**
+**TypeScript 예시**
 
-   - vault 총 스테이킹 수량, 달성한 할인율, 누적 수익
-   - 내 지분/수익 현황 (staking, 차익 분배, 이자 분배)
-   - staking / unstaking 기능
+```ts
+import { Contract, Wallet, JsonRpcProvider } from "ethers";
+import RouterABI from "./abi/ViperRouter.json";
 
-4. **Profile Page**
-   - 지갑별 참여 이력 조회
-   - vault 보유 지분, 예상 분배 수익 표시
-   - claim 가능한 보상 내역
+const provider = new JsonRpcProvider(process.env.HYPER_EVM_RPC_URL!);
+const signer = new Wallet(process.env.EXECUTOR_PRIVATE_KEY!, provider);
+const router = new Contract(process.env.ROUTER_ADDRESS!, RouterABI, signer);
+
+const amountIn = BigInt("1000000"); // 1e6(토큰 소수점 기준 예시)
+const q = await router.getQuote(tokenIn, tokenOut, amountIn);
+
+if (Date.now() / 1000 > Number(q.validUntil)) throw new Error("QUOTE_EXPIRED");
+
+const minOut = (q.amountOut * 995n) / 1000n; // 0.5% 슬리피지 예시
+const tx = await router.swapExactIn(q.quoteId, amountIn, minOut, receiver, false);
+const rc = await tx.wait();
+console.log("SwapExecuted:", rc?.transactionHash);
+```
+
+> 상세 통합 문서는 `/api/docs` 및 `docs/INTEGRATION.md`(선택)에 정리합니다.
+
+---
+
+## 🖥 페이지 구성
+
+1. **Landing**: 핵심 가치(“Aggregator에게 더 좋은 가격”), 3요소 아키텍처, CTA
+2. **Swap**: 데모용 스왑 UI(가격 비교, 예상 슬리피지, 체결 내역)
+3. **Vault**: 누적 스테이킹/수익, 내 지분/분배, stake/unstake, claim
+4. **Profile**: 지갑별 참여 이력, 보상 내역
+5. **Developers**: ABI/이벤트/예제/상태 페이지 링크
+
+---
 
 ## 🛠 기술 스택
 
 **Frontend**
 
-- Next.js 15 with App Router
-- Tailwind CSS 4
-- shadcn/ui
-- Zustand (전역 상태 관리)
-- TanStack Query (서버 상태 관리)
-- Axios (API 호출)
+* Next.js 15(App Router), Tailwind CSS 4, shadcn/ui
+* Zustand(전역 상태), TanStack Query(서버 상태), Axios
 
 **Backend**
 
-- NestJS 11
-- TypeORM
-- PostgreSQL 17
-- Passport (인증)
+* NestJS 11
+* TypeORM + PostgreSQL 17
+* (모듈) Quote Cache/Simulator, Execution Orchestrator, Indexer(API/Swagger)
 
 **Blockchain**
 
-- HyperEVM + Corewriter 기반 스마트컨트랙트
+* **HyperEVM + corewriter 기반 Router/Wrapper**
+* **HyperCore** 서브어카운트 기반 Swap Agent
 
 **기타**
 
-- Turbo Monorepo
-- ESLint + Prettier
-- TypeScript
+* Turbo Monorepo, ESLint + Prettier, TypeScript
+
+---
+
+## 📈 수수료/수익 모델(요약)
+
+* **프로토콜 캡쳐 bps 상한** 설정(예: `0 ~ X bps`)
+* 상한을 넘어선 가격 개선분은 **모두 사용자 가격에 반영**
+* 수익 귀속: 프로토콜/운영자/Vault(거버넌스 파라미터로 조정)
+
+---
+
+## 🔒 보안·리스크·정책
+
+* **Quote TTL** 짧게 유지(예: 2–5초), 만료 시 실행 불가
+* **슬리피지/가격 상한** 엄격 적용, 초과 시 전체 revert(또는 부분체결 허용 시 잔량 revert)
+* **재고/충격 한도** 초과 시 페어 일시 제한 및 자동 리밸런싱
+* **키 보관**: `EXECUTOR_PRIVATE_KEY`는 안전한 비밀 관리(예: Vault/Secret Manager)
+
+---
 
 ## 🐛 문제 해결
 
-### 일반적인 문제들
-
-1. **포트 충돌 오류**
+1. **포트 충돌**
 
    ```bash
-   # 사용 중인 포트 확인
    lsof -i :3000
    lsof -i :4000
-
-   # 프로세스 종료
    kill -9 <PID>
    ```
+2. **DB 연결 실패**
 
-2. **데이터베이스 연결 오류**
-
-   - PostgreSQL 서비스가 실행 중인지 확인
-   - `.env` 파일의 데이터베이스 설정 확인
-   - 데이터베이스와 사용자가 생성되었는지 확인
-
-3. **테이블이 생성되지 않는 경우**
+   * PostgreSQL 서비스 실행/접속 정보(.env) 확인
+   * 사용자/DB 생성 여부 확인
+3. **테이블 미생성**
 
    ```bash
-   # app.module.ts에서 synchronize: true 설정 확인
-   # 백엔드 재시작
+   # app.module.ts에서 synchronize: true (최초 1회)
    pnpm --filter api dev
    ```
+4. **엔티티 오류**
 
-4. **엔티티 관련 오류**
+   * `apps/api/src/` 엔티티 파일 존재 여부
+   * `autoLoadEntities: true` 확인
+5. **스왑 실행 오류(예시)**
 
-   - `apps/api/src/` 폴더에 엔티티 파일들이 있는지 확인
-   - TypeORM의 `autoLoadEntities: true` 설정이 활성화되어 있는지 확인
+   * `QUOTE_EXPIRED`: TTL 초과 → 새 quote 요청
+   * `SLIPPAGE_EXCEEDED`: `minAmountOut` 재설정
+   * `INVENTORY_LIMIT`: 한도 완화 대기 또는 소액 분할
 
-## 🌟 브랜드 정보
+---
 
-- **마스코트**: 귀여운 뱀 🐍
-- **브랜드 색상**: 살짝 네온빛이 도는 초록색 (#4EF08A)
-- **네이밍 의미**: _hyper_ + _VIP_ → 고액 스테이킹자만 누릴 수 있던 혜택을 풀(pool) 구조로 확장하여 VIP 경험을 다수 유저가 공유
+## 🧭 아키텍처(요약)
+
+```
+Aggregator ↔ Viper Router (HyperEVM, SC)
+                │  getQuote()/swapExactIn()
+                ▼
+         corewriter Bridge
+                ▼
+        HyperCore Swap Agent
+      (pair-scoped subaccounts)
+                │  IOC/TWAP fills
+                ▼
+          Receiver (tokenOut)
+                │
+          Events/Accounting → Indexer/DB → Vault Distribution
+```
+
+---
+
+## 🌟 브랜드
+
+* **마스코트**: 귀여운 뱀 🐍
+* **브랜드 색상**: 네온 그린(#4EF08A)
+* **네이밍**: *hyper* + *VIP* → VIP 경험을 다수 유저가 공유
+
+---
 
 ## 📞 지원
 
-문제가 발생하거나 질문이 있으시면 이슈를 생성해 주세요.
+문제가 발생하거나 제안이 있다면 **Issues**에 등록해주세요.
+통합 파트너(Aggregator) 문의는 별도 채널로 안내드립니다.
 
 ---
 
