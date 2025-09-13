@@ -4,9 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TenantsModule } from './tenants/tenants.module';
-import { User } from './users/user.entity';
-import { Tenant } from './tenants/tenant.entity';
-import { Invitation } from './tenants/invitation.entity';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
@@ -25,8 +22,7 @@ import { PassportModule } from '@nestjs/passport';
         database: configService.get('DB_DATABASE'),
         ssl: configService.get('DB_SSL') === 'true',
         autoLoadEntities: true,
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') !== 'production',
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),
@@ -38,4 +34,4 @@ import { PassportModule } from '@nestjs/passport';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
