@@ -3,7 +3,7 @@
 ## 1. 프로젝트 개요
 
 - **프로젝트명**: viper
-- **네이밍 의미**: *hyper* + *VIP* → VIP 수준의 가격·체결 경험을 다수 사용자에게 확장.
+- **네이밍 의미**: _hyper_ + _VIP_ → VIP 수준의 가격·체결 경험을 다수 사용자에게 확장.
 - **브랜드**: 마스코트—귀여운 뱀, 메인 컬러—네온 그린(#4EF08A 근사치)
 
 ### 1.1 미션(개정)
@@ -26,66 +26,71 @@
 ### 2.1 구성요소 (3-레그)
 
 1. **HyperCore Swap Agent (오프체인 실행 로직 + Core 계정)**
+
 - **페어별 서브어카운트** 다중 생성(예: `BTC/USDC: subA, subB…`)하여 **병렬 처리·리스크 격리**.
 - **입금 감지 → 즉시 스왑 → 재전송** 파이프라인.
 - **주문 정책**:
-    - **IOC**(즉시체결) 기본, **TWAP**(대량/저영향) 옵션.
-    - **가격 한도**(limit/impact cap), **부분체결 허용 여부**, **유효시간**.
+  - **IOC**(즉시체결) 기본, **TWAP**(대량/저영향) 옵션.
+  - **가격 한도**(limit/impact cap), **부분체결 허용 여부**, **유효시간**.
 - **재고/리밸런싱**:
-    - 양측 재고 불균형 시 반대 방향 미니-TWAP 또는 외부 라우트로 **자동 리밸런싱**.
-    - 재고·위험 한도 초과 시 신규 quote **일시 제한**.
+  - 양측 재고 불균형 시 반대 방향 미니-TWAP 또는 외부 라우트로 **자동 리밸런싱**.
+  - 재고·위험 한도 초과 시 신규 quote **일시 제한**.
+
 1. **HyperEVM Router/Wrapper (스마트컨트랙트, corewriter 연동)**
+
 - **표준 인터페이스(권장 초안)**
-    
-    ```solidity
-    function getQuote(
-      address tokenIn,
-      address tokenOut,
-      uint256 amountIn
-    )
-    external view
-    returns (
-      uint256 amountOut,     // 예상 수령량(수수료 반영)
-      uint32  feeBps,        // 프로토콜 캡쳐 bps (상한)
-      uint64  validUntil,    // quote 만료 시각
-      bytes32 quoteId        // 실행 시 참조
-    );
-    
-    function swapExactIn(
-      bytes32 quoteId,
-      uint256 amountIn,
-      uint256 minAmountOut,
-      address receiver,
-      bool allowPartialFill // 부분체결 허용 여부
-    )
-    external payable returns (uint256 amountOut);
-    
-    ```
-    
+
+  ```solidity
+  function getQuote(
+    address tokenIn,
+    address tokenOut,
+    uint256 amountIn
+  )
+  external view
+  returns (
+    uint256 amountOut,     // 예상 수령량(수수료 반영)
+    uint32  feeBps,        // 프로토콜 캡쳐 bps (상한)
+    uint64  validUntil,    // quote 만료 시각
+    bytes32 quoteId        // 실행 시 참조
+  );
+
+  function swapExactIn(
+    bytes32 quoteId,
+    uint256 amountIn,
+    uint256 minAmountOut,
+    address receiver,
+    bool allowPartialFill // 부분체결 허용 여부
+  )
+  external payable returns (uint256 amountOut);
+
+  ```
+
 - **특징**
-    - corewriter를 통해 **HyperCore Swap Agent에 실행 명령**.
-    - **거의-원자적 실행** UX: 만료·슬리피지·부분체결 정책을 엄격 적용.
-    - **Permit(2612)/Permit2** 지원(가스·승인 UX 개선).
-    - **이벤트**: `QuoteCreated`, `SwapExecuted`, `SwapPartiallyFilled`, `SwapReverted`, `FeeCaptured`, `Rebalance` 등.
+  - corewriter를 통해 **HyperCore Swap Agent에 실행 명령**.
+  - **거의-원자적 실행** UX: 만료·슬리피지·부분체결 정책을 엄격 적용.
+  - **Permit(2612)/Permit2** 지원(가스·승인 UX 개선).
+  - **이벤트**: `QuoteCreated`, `SwapExecuted`, `SwapPartiallyFilled`, `SwapReverted`, `FeeCaptured`, `Rebalance` 등.
+
 1. **Viper Vault (선택)**
+
 - **HYPE 스테이킹 LST(stHYPE)** 발행(1:1 누적형), 수익 원천:
-    - (a) Hyper staking reward
-    - (b) 스왑 실행 차익(프로토콜 fee 캡쳐분 일부)
-    - (c) 메이커 리베이트(존재 시)
+  - (a) Hyper staking reward
+  - (b) 스왑 실행 차익(프로토콜 fee 캡쳐분 일부)
+  - (c) 메이커 리베이트(존재 시)
 - **자동화**: Deposit/Withdraw/Stake/Unstake를 corewriter로 **원클릭**.
 - **분배**: 주기적 claim 또는 auto-compound(옵션).
 
 ### 2.2 데이터·서비스 계층
 
 - **Quote Cache & Simulator**
-    - 오더북 스냅샷, 수수료, 충돌 위험(동시성) 반영해 **ms~초 단위**로 `getQuote` 결과 예측.
-    - **유효시간(validUntil)** 짧게 설정(예: 2–5초)으로 stale quote 방지.
+  - 오더북 스냅샷, 수수료, 충돌 위험(동시성) 반영해 **ms~초 단위**로 `getQuote` 결과 예측.
+  - **유효시간(validUntil)** 짧게 설정(예: 2–5초)으로 stale quote 방지.
 - **Execution Orchestrator**
-    - 페어·서브어카운트별 **동시성 큐**, 재시도·부분체결 처리.
+  - 페어·서브어카운트별 **동시성 큐**, 재시도·부분체결 처리.
 - **Risk/Limit Manager**
-    - 페어별 **최대 체결가 변동, 최대 충격 bps, 최대 체결량** 등 정책.
+  - 페어별 **최대 체결가 변동, 최대 충격 bps, 최대 체결량** 등 정책.
 - **Accounting**
-    - 수익·수수료·분배·재고·실패 로그 **불변 원장** 기록(PostgreSQL + 이벤트 인덱서).
+  - 수익·수수료·분배·재고·실패 로그 **불변 원장** 기록(PostgreSQL + 이벤트 인덱서).
 
 ---
 
@@ -97,7 +102,7 @@
 2. viper Router → `amountOut/feeBps/validUntil/quoteId` 반환
 3. Aggregator → 사용자 주문에서 viper 루트 선택 시 `swapExactIn(...)` 실행
 4. Router → corewriter → HyperCore Swap Agent 실행
-5. 체결 성공 시 **`receiver`*로 `tokenOut` 전송, 이벤트 발생
+5. 체결 성공 시 \**`receiver`*로 `tokenOut` 전송, 이벤트 발생
 6. 실패/만료/슬리피지 초과 시 **전체 revert**(또는 부분체결 허용 시 부분 체결 후 잔량 revert)
 
 ### 3.2 Direct-Deposit 모드(보조)
@@ -138,16 +143,16 @@
 ## 5. 페이지 구성 (개정)
 
 1. **Landing**
-    - “**Aggregator에게 더 좋은 가격**을” — 핵심 가치 및 구조(3요소) 소개
-    - CTA: “Connect Wallet”, “Join Vault”, “View Docs”
+   - “**Aggregator에게 더 좋은 가격**을” — 핵심 가치 및 구조(3요소) 소개
+   - CTA: “Connect Wallet”, “Join Vault”, “View Docs”
 2. **Swap**
-    - End-user 데모용(가격 비교, 예상 슬리피지, 체결내역)
+   - End-user 데모용(가격 비교, 예상 슬리피지, 체결내역)
 3. **Vault**
-    - 누적 스테이킹/수익, 내 지분/분배, stake/unstake, claim
+   - 누적 스테이킹/수익, 내 지분/분배, stake/unstake, claim
 4. **Profile**
-    - 지갑별 참여 이력, 보상 내역
+   - 지갑별 참여 이력, 보상 내역
 5. **Developers(신규)**
-    - ABI, 예제, 이벤트, 통합 가이드, 요금정책, 상태 페이지 링크
+   - ABI, 예제, 이벤트, 통합 가이드, 요금정책, 상태 페이지 링크
 
 ---
 
@@ -194,27 +199,27 @@
 
 ### Smart Contract
 
-- [ ]  **Router/Wrapper**: `getQuote`, `swapExactIn`, `Permit(2612)/Permit2` 지원
-- [ ]  **이벤트/에러 코드** 표준화, 체인링크 등 외부 의존 X(초기)
-- [ ]  **Vault(stHYPE)**: 민팅/소각, 수익 집계·분배 로직, 안전장치(긴급 정지)
+- [ ] **Router/Wrapper**: `getQuote`, `swapExactIn`, `Permit(2612)/Permit2` 지원
+- [ ] **이벤트/에러 코드** 표준화, 체인링크 등 외부 의존 X(초기)
+- [ ] **Vault(stHYPE)**: 민팅/소각, 수익 집계·분배 로직, 안전장치(긴급 정지)
 
 ### Backend
 
-- [ ]  **Quote Cache/Simulator**: 오더북 스냅샷·수수료·동시성 반영
-- [ ]  **Execution Orchestrator**: 페어/서브어카운트 큐, 재시도/리밸런싱
-- [ ]  **Indexer**: 온체인 이벤트 → DB 동기화, 정산 리포트
-- [ ]  **Partner API**: 상태/메트릭·헬스체크 엔드포인트
+- [ ] **Quote Cache/Simulator**: 오더북 스냅샷·수수료·동시성 반영
+- [ ] **Execution Orchestrator**: 페어/서브어카운트 큐, 재시도/리밸런싱
+- [ ] **Indexer**: 온체인 이벤트 → DB 동기화, 정산 리포트
+- [ ] **Partner API**: 상태/메트릭·헬스체크 엔드포인트
 
 ### Frontend
 
-- [ ]  Landing/Swap/Vault/Profile/Developers 페이지
-- [ ]  WalletConnect(HyperEVM)
-- [ ]  가격 개선·분배 현황 대시보드
+- [ ] Landing/Swap/Vault/Profile/Developers 페이지
+- [ ] WalletConnect(HyperEVM)
+- [ ] 가격 개선·분배 현황 대시보드
 
 ### Integrations
 
-- [ ]  SDK/문서화: 1inch/ParaSwap/Odos 스타일 **플러그인 가이드**
-- [ ]  테스트넷 파트너 PoC
+- [ ] SDK/문서화: 1inch/ParaSwap/Odos 스타일 **플러그인 가이드**
+- [ ] 테스트넷 파트너 PoC
 
 ---
 

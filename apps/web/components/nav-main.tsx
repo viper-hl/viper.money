@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { ChevronRight, type LucideIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@workspace/ui/components/collapsible"
+} from '@workspace/ui/components/collapsible';
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -17,39 +17,41 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@workspace/ui/components/sidebar"
+} from '@workspace/ui/components/sidebar';
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
     items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+      title: string;
+      url: string;
+    }[];
+  }[];
 }) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
-  const isItemActive = (item: typeof items[0]) => {
+  const isItemActive = (item: (typeof items)[0]) => {
     // Check if current path matches the item URL
-    const isMainPathActive = pathname === item.url
+    const isMainPathActive = pathname === item.url;
     // Check if any sub-item URL matches current path
-    const isSubPathActive = item.items?.some(subItem => pathname === subItem.url)
-    
-    return isMainPathActive || isSubPathActive
-  }
+    const isSubPathActive = item.items?.some(
+      (subItem) => pathname === subItem.url,
+    );
+
+    return isMainPathActive || isSubPathActive;
+  };
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const hasSubItems = item.items && item.items.length > 0
+          const hasSubItems = item.items && item.items.length > 0;
 
           return hasSubItems ? (
             <Collapsible
@@ -60,9 +62,11 @@ export function NavMain({
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     tooltip={item.title}
-                    className={isItemActive(item) ? "text-accent-foreground" : ""}
+                    className={
+                      isItemActive(item) ? 'text-accent-foreground' : ''
+                    }
                   >
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -73,9 +77,13 @@ export function NavMain({
                   <SidebarMenuSub>
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton 
+                        <SidebarMenuSubButton
                           asChild
-                          className={pathname === subItem.url ? "text-accent-foreground" : ""}
+                          className={
+                            pathname === subItem.url
+                              ? 'text-accent-foreground'
+                              : ''
+                          }
                         >
                           <a href={subItem.url}>
                             <span>{subItem.title}</span>
@@ -89,10 +97,10 @@ export function NavMain({
             </Collapsible>
           ) : (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton 
-                asChild 
+              <SidebarMenuButton
+                asChild
                 tooltip={item.title}
-                className={isItemActive(item) ? "text-accent-foreground" : ""}
+                className={isItemActive(item) ? 'text-accent-foreground' : ''}
               >
                 <a href={item.url}>
                   {item.icon && <item.icon />}
@@ -100,9 +108,9 @@ export function NavMain({
                 </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )
+          );
         })}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

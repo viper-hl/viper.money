@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   AudioWaveform,
@@ -8,88 +8,81 @@ import {
   Home,
   Map,
   PieChart,
-  Settings2
-} from "lucide-react"
-import * as React from "react"
+  Settings2,
+  PiggyBank,
+  Code,
+  User,
+} from 'lucide-react';
+import * as React from 'react';
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavMain } from '@/components/nav-main';
+import { NavUser } from '@/components/nav-user';
+import { TeamSwitcher } from '@/components/team-switcher';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@workspace/ui/components/sidebar"
+} from '@workspace/ui/components/sidebar';
 
 // Navigation data
 const navData = [
   {
-    title: "Home",
-    url: "/",
+    title: 'Swap',
+    url: '/swap',
     icon: Home,
-    items: [
-      {
-        title: "Dashboard",
-        url: "/dashboard",
-      },
-      {
-        title: "Transactions",
-        url: "/transactions",
-      },
-    ],
   },
   {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings2,      
+    title: 'Vault',
+    url: '/vault',
+    icon: PiggyBank,
   },
-]
+  {
+    title: 'Profile',
+    url: '/profile',
+    icon: User,
+  },
+  {
+    title: 'Developers',
+    url: '/developers',
+    icon: Code,
+  },
+];
 
 // This is sample data.
 export const data = {
   user: {
-    name: "mohit",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: 'Viper User',
+    email: 'user@viper.money',
+    avatar: '/avatars/viper.jpg',
   },
   teams: [
     {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      name: 'Viper',
+      logo: () => '🐍',
+      plan: 'Protocol',
     },
   ],
   navMain: navData,
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
+      name: 'Hyperliquid Integration',
+      url: '#',
       icon: Frame,
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
+      name: 'Router Analytics',
+      url: '#',
       icon: PieChart,
     },
     {
-      name: "Travel",
-      url: "#",
+      name: 'Vault Management',
+      url: '#',
       icon: Map,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -105,5 +98,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

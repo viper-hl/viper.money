@@ -10,13 +10,14 @@ viper는 **EVM의 DEX Aggregator가 Hyperliquid의 spot 오더북을 라우팅**
 
 ## ✨ TL;DR
 
-* **3요소 아키텍처**
+- **3요소 아키텍처**
 
   1. **HyperCore Swap Agent**: 페어별 **서브어카운트**로 입금 감지→즉시 스왑→재전송
   2. **HyperEVM Router/Wrapper**(corewriter 기반): `getQuote`/`swapExactIn` 제공 → **Aggregator가 쉽게 통합**
   3. **Viper Vault(LST)**: **HYPE 스테이킹 + 스왑 수익 일부 공유**(선택)
-* **사용자 이득 우선**: 프로토콜 캡쳐 수수료(bps)에 \*\*상한(cap)\*\*을 두고, 초과분은 **가격 개선으로 환원**
-* **개발자 친화**: ABI/이벤트/예제, `/api/docs` 제공(스웨거), Quote TTL/슬리피지/부분체결 정책 명확화
+
+- **사용자 이득 우선**: 프로토콜 캡쳐 수수료(bps)에 \*\*상한(cap)\*\*을 두고, 초과분은 **가격 개선으로 환원**
+- **개발자 친화**: ABI/이벤트/예제, `/api/docs` 제공(스웨거), Quote TTL/슬리피지/부분체결 정책 명확화
 
 ---
 
@@ -24,10 +25,10 @@ viper는 **EVM의 DEX Aggregator가 Hyperliquid의 spot 오더북을 라우팅**
 
 ### 1) 사전 요구사항
 
-* **Node.js** LTS(권장 v18+ / v20+)
-* **pnpm**
-* **PostgreSQL 17**
-* (선택) **HyperEVM RPC** 엔드포인트, 테스트 지갑
+- **Node.js** LTS(권장 v18+ / v20+)
+- **pnpm**
+- **PostgreSQL 17**
+- (선택) **HyperEVM RPC** 엔드포인트, 테스트 지갑
 
 #### pnpm 설치
 
@@ -50,7 +51,7 @@ psql postgres
 
 **Windows**
 
-* [PostgreSQL 공식 사이트](https://www.postgresql.org/download/windows/)에서 설치 후 비밀번호 설정
+- [PostgreSQL 공식 사이트](https://www.postgresql.org/download/windows/)에서 설치 후 비밀번호 설정
 
 ### 2) 데이터베이스 설정
 
@@ -163,14 +164,14 @@ TypeOrmModule.forRootAsync({
 });
 ```
 
-* `synchronize: true`는 엔티티 기준으로 스키마를 자동 생성/수정합니다.
-* **프로덕션에서는 절대 사용하지 마세요.** 초기 테이블 생성 후에는 `false`로 변경하세요.
+- `synchronize: true`는 엔티티 기준으로 스키마를 자동 생성/수정합니다.
+- **프로덕션에서는 절대 사용하지 마세요.** 초기 테이블 생성 후에는 `false`로 변경하세요.
 
 ### 6) 접속 확인
 
-* **웹**: [http://localhost:3000](http://localhost:3000)
-* **API**: [http://localhost:4000](http://localhost:4000)
-* **API 문서(Swagger)**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
+- **웹**: [http://localhost:3000](http://localhost:3000)
+- **API**: [http://localhost:4000](http://localhost:4000)
+- **API 문서(Swagger)**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
 
 ---
 
@@ -201,8 +202,8 @@ viper.money/
 
 ### 1) **HyperEVM Router/Wrapper (스마트컨트랙트)**
 
-* corewriter 응용. **DEX Aggregator 친화적 인터페이스** 제공
-* 표준형 메서드(요약):
+- corewriter 응용. **DEX Aggregator 친화적 인터페이스** 제공
+- 표준형 메서드(요약):
 
 ```solidity
 function getQuote(
@@ -225,19 +226,19 @@ function swapExactIn(
 ) external payable returns (uint256 amountOut);
 ```
 
-* **정책**: Quote TTL, 슬리피지 상한, 부분체결 허용 여부를 매개변수로 **거의-원자적 실행** UX 제공
-* **이벤트 예시**: `QuoteCreated`, `SwapExecuted`, `SwapPartiallyFilled`, `SwapReverted`, `FeeCaptured`, `Rebalance`
+- **정책**: Quote TTL, 슬리피지 상한, 부분체결 허용 여부를 매개변수로 **거의-원자적 실행** UX 제공
+- **이벤트 예시**: `QuoteCreated`, `SwapExecuted`, `SwapPartiallyFilled`, `SwapReverted`, `FeeCaptured`, `Rebalance`
 
 ### 2) **HyperCore Swap Agent**
 
-* **페어별 서브어카운트**로 입금 감지 → 정책(IOC/TWAP, 가격 상한, 부분체결 등)에 따라 **즉시 스왑** → **재전송**
-* **재고/리스크 관리**: 페어별 체결 충격 상한/최대 체결량/재고 한도, 자동 리밸런싱
+- **페어별 서브어카운트**로 입금 감지 → 정책(IOC/TWAP, 가격 상한, 부분체결 등)에 따라 **즉시 스왑** → **재전송**
+- **재고/리스크 관리**: 페어별 체결 충격 상한/최대 체결량/재고 한도, 자동 리밸런싱
 
 ### 3) **Viper Vault (LST, 선택)**
 
-* **HYPE 스테이킹 → stHYPE 민팅**
-* 수익 원천: (a) 스테이킹 리워드 (b) 스왑 실행 캡쳐 수익 일부 (c) (존재 시) 메이커 리베이트
-* **자동화**: Deposit/Withdraw & Stake/Unstake를 corewriter로 처리, 분배 투명화
+- **HYPE 스테이킹 → stHYPE 민팅**
+- 수익 원천: (a) 스테이킹 리워드 (b) 스왑 실행 캡쳐 수익 일부 (c) (존재 시) 메이커 리베이트
+- **자동화**: Deposit/Withdraw & Stake/Unstake를 corewriter로 처리, 분배 투명화
 
 ---
 
@@ -264,7 +265,13 @@ const q = await router.getQuote(tokenIn, tokenOut, amountIn);
 if (Date.now() / 1000 > Number(q.validUntil)) throw new Error("QUOTE_EXPIRED");
 
 const minOut = (q.amountOut * 995n) / 1000n; // 0.5% 슬리피지 예시
-const tx = await router.swapExactIn(q.quoteId, amountIn, minOut, receiver, false);
+const tx = await router.swapExactIn(
+  q.quoteId,
+  amountIn,
+  minOut,
+  receiver,
+  false,
+);
 const rc = await tx.wait();
 console.log("SwapExecuted:", rc?.transactionHash);
 ```
@@ -287,40 +294,40 @@ console.log("SwapExecuted:", rc?.transactionHash);
 
 **Frontend**
 
-* Next.js 15(App Router), Tailwind CSS 4, shadcn/ui
-* Zustand(전역 상태), TanStack Query(서버 상태), Axios
+- Next.js 15(App Router), Tailwind CSS 4, shadcn/ui
+- Zustand(전역 상태), TanStack Query(서버 상태), Axios
 
 **Backend**
 
-* NestJS 11
-* TypeORM + PostgreSQL 17
-* (모듈) Quote Cache/Simulator, Execution Orchestrator, Indexer(API/Swagger)
+- NestJS 11
+- TypeORM + PostgreSQL 17
+- (모듈) Quote Cache/Simulator, Execution Orchestrator, Indexer(API/Swagger)
 
 **Blockchain**
 
-* **HyperEVM + corewriter 기반 Router/Wrapper**
-* **HyperCore** 서브어카운트 기반 Swap Agent
+- **HyperEVM + corewriter 기반 Router/Wrapper**
+- **HyperCore** 서브어카운트 기반 Swap Agent
 
 **기타**
 
-* Turbo Monorepo, ESLint + Prettier, TypeScript
+- Turbo Monorepo, ESLint + Prettier, TypeScript
 
 ---
 
 ## 📈 수수료/수익 모델(요약)
 
-* **프로토콜 캡쳐 bps 상한** 설정(예: `0 ~ X bps`)
-* 상한을 넘어선 가격 개선분은 **모두 사용자 가격에 반영**
-* 수익 귀속: 프로토콜/운영자/Vault(거버넌스 파라미터로 조정)
+- **프로토콜 캡쳐 bps 상한** 설정(예: `0 ~ X bps`)
+- 상한을 넘어선 가격 개선분은 **모두 사용자 가격에 반영**
+- 수익 귀속: 프로토콜/운영자/Vault(거버넌스 파라미터로 조정)
 
 ---
 
 ## 🔒 보안·리스크·정책
 
-* **Quote TTL** 짧게 유지(예: 2–5초), 만료 시 실행 불가
-* **슬리피지/가격 상한** 엄격 적용, 초과 시 전체 revert(또는 부분체결 허용 시 잔량 revert)
-* **재고/충격 한도** 초과 시 페어 일시 제한 및 자동 리밸런싱
-* **키 보관**: `EXECUTOR_PRIVATE_KEY`는 안전한 비밀 관리(예: Vault/Secret Manager)
+- **Quote TTL** 짧게 유지(예: 2–5초), 만료 시 실행 불가
+- **슬리피지/가격 상한** 엄격 적용, 초과 시 전체 revert(또는 부분체결 허용 시 잔량 revert)
+- **재고/충격 한도** 초과 시 페어 일시 제한 및 자동 리밸런싱
+- **키 보관**: `EXECUTOR_PRIVATE_KEY`는 안전한 비밀 관리(예: Vault/Secret Manager)
 
 ---
 
@@ -333,25 +340,29 @@ console.log("SwapExecuted:", rc?.transactionHash);
    lsof -i :4000
    kill -9 <PID>
    ```
+
 2. **DB 연결 실패**
 
-   * PostgreSQL 서비스 실행/접속 정보(.env) 확인
-   * 사용자/DB 생성 여부 확인
+   - PostgreSQL 서비스 실행/접속 정보(.env) 확인
+   - 사용자/DB 생성 여부 확인
+
 3. **테이블 미생성**
 
    ```bash
    # app.module.ts에서 synchronize: true (최초 1회)
    pnpm --filter api dev
    ```
+
 4. **엔티티 오류**
 
-   * `apps/api/src/` 엔티티 파일 존재 여부
-   * `autoLoadEntities: true` 확인
+   - `apps/api/src/` 엔티티 파일 존재 여부
+   - `autoLoadEntities: true` 확인
+
 5. **스왑 실행 오류(예시)**
 
-   * `QUOTE_EXPIRED`: TTL 초과 → 새 quote 요청
-   * `SLIPPAGE_EXCEEDED`: `minAmountOut` 재설정
-   * `INVENTORY_LIMIT`: 한도 완화 대기 또는 소액 분할
+   - `QUOTE_EXPIRED`: TTL 초과 → 새 quote 요청
+   - `SLIPPAGE_EXCEEDED`: `minAmountOut` 재설정
+   - `INVENTORY_LIMIT`: 한도 완화 대기 또는 소액 분할
 
 ---
 
@@ -376,9 +387,9 @@ Aggregator ↔ Viper Router (HyperEVM, SC)
 
 ## 🌟 브랜드
 
-* **마스코트**: 귀여운 뱀 🐍
-* **브랜드 색상**: 네온 그린(#4EF08A)
-* **네이밍**: *hyper* + *VIP* → VIP 경험을 다수 유저가 공유
+- **마스코트**: 귀여운 뱀 🐍
+- **브랜드 색상**: 네온 그린(#4EF08A)
+- **네이밍**: _hyper_ + _VIP_ → VIP 경험을 다수 유저가 공유
 
 ---
 

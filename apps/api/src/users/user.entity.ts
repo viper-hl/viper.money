@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Tenant } from '../tenants/tenant.entity';
 
@@ -19,11 +27,17 @@ export class User {
   @Column({ nullable: true })
   name: string;
 
-  @ApiProperty({ example: 'Software engineer passionate about...', description: 'User bio' })
+  @ApiProperty({
+    example: 'Software engineer passionate about...',
+    description: 'User bio',
+  })
   @Column({ type: 'text', nullable: true })
   bio: string;
 
-  @ApiProperty({ example: 'https://example.com/avatar.jpg', description: 'User avatar URL' })
+  @ApiProperty({
+    example: 'https://example.com/avatar.jpg',
+    description: 'User avatar URL',
+  })
   @Column({ name: 'avatar_url', nullable: true })
   avatarUrl: string;
 
@@ -34,7 +48,7 @@ export class User {
   @Column({ name: 'tenant_id', nullable: true })
   tenantId: string;
 
-  @ManyToOne(() => Tenant, tenant => tenant.users)
+  @ManyToOne(() => Tenant, (tenant) => tenant.users)
   @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 

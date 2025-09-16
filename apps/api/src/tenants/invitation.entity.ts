@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Tenant } from './tenant.entity';
 import { User } from '../users/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
@@ -9,7 +17,10 @@ export class Invitation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ApiProperty({ example: 'user@example.com', description: 'Invited email address' })
+  @ApiProperty({
+    example: 'user@example.com',
+    description: 'Invited email address',
+  })
   @Column()
   email: string;
 

@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException, UnauthorizedException, HttpException, HttpStatus, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tenant } from './tenant.entity';
@@ -31,7 +38,7 @@ export class TenantsService {
     private invitationsRepository: Repository<Invitation>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async createTenant(dto: CreateTenantDto): Promise<Tenant> {
     const tenant = this.tenantsRepository.create({
@@ -43,16 +50,18 @@ export class TenantsService {
     // Update the admin user with the tenant ID and admin role
     await this.usersRepository.update(dto.adminId, {
       tenantId: savedTenant.id,
-      roles: ['admin']
+      roles: ['admin'],
     });
 
     return savedTenant;
   }
 
-  async createInvitation(dto: CreateInvitationDto): Promise<InvitationResponse> {
+  async createInvitation(
+    dto: CreateInvitationDto,
+  ): Promise<InvitationResponse> {
     // Check if user already exists
     const existingUser = await this.usersRepository.findOne({
-      where: { email: dto.email }
+      where: { email: dto.email },
     });
     if (existingUser) {
       throw new UnauthorizedException('User already exists');
@@ -95,10 +104,13 @@ export class TenantsService {
     }
 
     if (invitation.status !== 'pending') {
-      throw new HttpException({
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Invitation has already been used or expired',
-      }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Invitation has already been used or expired',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const user = await this.usersRepository.findOne({
@@ -124,16 +136,20 @@ export class TenantsService {
   async getTenantUsers(tenantId: string): Promise<User[]> {
     return this.usersRepository.find({
       where: { tenantId },
-      select: ['id', 'email', 'roles', 'createdAt']
+      select: ['id', 'email', 'roles', 'createdAt'],
     });
   }
 
   async validateInvitation(token: string): Promise<boolean> {
     const invitation = await this.invitationsRepository.findOne({
-      where: { token }
+      where: { token },
     });
 
-    return !!(invitation && invitation.status === 'pending' && invitation.expiresAt > new Date());
+    return !!(
+      invitation &&
+      invitation.status === 'pending' &&
+      invitation.expiresAt > new Date()
+    );
   }
 
   async getTenantById(id: string): Promise<Tenant> {
@@ -148,25 +164,35 @@ export class TenantsService {
     return tenant;
   }
 
-  async updateUserRole(tenantId: string, userId: string, newRole: 'admin' | 'user'): Promise<void> {
+  async updateUserRole(
+    tenantId: string,
+    userId: string,
+    newRole: 'admin' | 'user',
+  ): Promise<void> {
     const users = await this.usersRepository.find({ where: { tenantId } });
-    const targetUser = users.find(u => u.id === userId);
+    const targetUser = users.find((u) => u.id === userId);
 
     if (!targetUser) {
-      throw new HttpException({
-        status: HttpStatus.NOT_FOUND,
-        message: 'User not found in tenant',
-      }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          message: 'User not found in tenant',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // If changing from admin to user, ensure there will still be at least one admin
     if (targetUser.roles.includes('admin') && newRole === 'user') {
-      const adminCount = users.filter(u => u.roles.includes('admin')).length;
+      const adminCount = users.filter((u) => u.roles.includes('admin')).length;
       if (adminCount <= 1) {
-        throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Cannot remove the last admin from the tenant',
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Cannot remove the last admin from the tenant',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
     }
 
@@ -175,33 +201,46 @@ export class TenantsService {
     });
   }
 
-  async removeUser(tenantId: string, userId: string, requestingUserId: string): Promise<void> {
+  async removeUser(
+    tenantId: string,
+    userId: string,
+    requestingUserId: string,
+  ): Promise<void> {
     // Prevent self-removal
     if (userId === requestingUserId) {
-      throw new HttpException({
-        status: HttpStatus.BAD_REQUEST,
-        message: 'Cannot remove yourself from the tenant',
-      }, HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          message: 'Cannot remove yourself from the tenant',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const users = await this.usersRepository.find({ where: { tenantId } });
-    const targetUser = users.find(u => u.id === userId);
+    const targetUser = users.find((u) => u.id === userId);
 
     if (!targetUser) {
-      throw new HttpException({
-        status: HttpStatus.NOT_FOUND,
-        message: 'User not found in tenant',
-      }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          message: 'User not found in tenant',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // If removing an admin, ensure there will still be at least one admin
     if (targetUser.roles.includes('admin')) {
-      const adminCount = users.filter(u => u.roles.includes('admin')).length;
+      const adminCount = users.filter((u) => u.roles.includes('admin')).length;
       if (adminCount <= 1) {
-        throw new HttpException({
-          status: HttpStatus.BAD_REQUEST,
-          message: 'Cannot remove the last admin from the tenant',
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'Cannot remove the last admin from the tenant',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
     }
 
@@ -224,9 +263,12 @@ export class TenantsService {
     });
   }
 
-  async resendInvitation(invitationId: string, tenantId: string): Promise<InvitationResponse> {
+  async resendInvitation(
+    invitationId: string,
+    tenantId: string,
+  ): Promise<InvitationResponse> {
     const invitation = await this.invitationsRepository.findOne({
-      where: { id: invitationId, tenantId, status: 'pending' }
+      where: { id: invitationId, tenantId, status: 'pending' },
     });
 
     if (!invitation) {
@@ -249,9 +291,12 @@ export class TenantsService {
     };
   }
 
-  async cancelInvitation(invitationId: string, tenantId: string): Promise<void> {
+  async cancelInvitation(
+    invitationId: string,
+    tenantId: string,
+  ): Promise<void> {
     const invitation = await this.invitationsRepository.findOne({
-      where: { id: invitationId }
+      where: { id: invitationId },
     });
 
     if (!invitation) {
@@ -259,7 +304,9 @@ export class TenantsService {
     }
 
     if (invitation.tenantId !== tenantId) {
-      throw new ForbiddenException('You do not have permission to cancel this invitation');
+      throw new ForbiddenException(
+        'You do not have permission to cancel this invitation',
+      );
     }
 
     await this.invitationsRepository.delete(invitationId);

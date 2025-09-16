@@ -7,9 +7,7 @@ import { Invitation } from './invitation.entity';
 import { User } from '../users/user.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Tenant, Invitation, User]),
-  ],
+  imports: [TypeOrmModule.forFeature([Tenant, Invitation, User])],
   controllers: [TenantsController],
   providers: [TenantsService],
   exports: [TenantsService],
