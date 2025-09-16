@@ -30,7 +30,7 @@ import {
   useSidebar,
 } from '@workspace/ui/components/sidebar';
 
-import { signOut } from 'next-auth/react';
+import { useDisconnect } from 'wagmi';
 
 export function NavUser({
   user,
@@ -42,6 +42,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const { disconnect } = useDisconnect();
 
   return (
     <SidebarMenu>
@@ -104,9 +105,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem onClick={() => disconnect()}>
               <LogOut />
-              Log out
+              Disconnect
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
