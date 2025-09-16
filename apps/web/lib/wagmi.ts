@@ -1,14 +1,15 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import type { Config } from 'wagmi';
 import {
   mainnet,
   polygon,
   optimism,
   arbitrum,
   base,
-  hyperliquid,
+  // hyperliquid,
 } from 'wagmi/chains';
 
-// Hyperliquid 체인 설정 (메인넷)
+// Hyperliquid chain configuration (mainnet)
 const hyperliquidMainnet = {
   id: 998,
   name: 'Hyperliquid',
@@ -31,9 +32,9 @@ const hyperliquidMainnet = {
   testnet: false,
 } as const;
 
-export const config = getDefaultConfig({
+export const config: Config = getDefaultConfig({
   appName: 'Viper',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'viper-money',
   chains: [hyperliquidMainnet, mainnet, polygon, optimism, arbitrum, base],
-  ssr: true, // If your dApp uses server side rendering (SSR)
+  ssr: false, // Disable SSR to prevent indexedDB errors
 });
