@@ -68,19 +68,6 @@ const config: Config = {
           4: "hsl(var(--chart-4))",
           5: "hsl(var(--chart-5))",
         },
-        // Viper Brand Colors
-        viper: {
-          green: {
-            DEFAULT: "#4EF08A", // 네온 그린 (메인 컬러)
-            dark: "#3DD174",
-            light: "#6EF5A0",
-          },
-          bg: {
-            primary: "#0F0F23",
-            secondary: "#1E1E3F",
-            tertiary: "#2A2A5C",
-          },
-        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -88,13 +75,14 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
-        "viper-glow": {
-          "0%, 100%": { boxShadow: "0 0 5px #4EF08A" },
+        "primary-glow": {
+          "0%, 100%": { boxShadow: "0 0 5px hsl(var(--primary))" },
           "50%": {
-            boxShadow: "0 0 20px #4EF08A, 0 0 30px #4EF08A",
+            boxShadow:
+              "0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary))",
           },
         },
-        "viper-pulse": {
+        "primary-pulse": {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: ".5" },
         },
@@ -104,8 +92,9 @@ const config: Config = {
         },
       },
       animation: {
-        "viper-glow": "viper-glow 2s ease-in-out infinite",
-        "viper-pulse": "viper-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "primary-glow": "primary-glow 2s ease-in-out infinite",
+        "primary-pulse":
+          "primary-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "slide-in": "slide-in 0.3s ease-out",
       },
     },

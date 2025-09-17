@@ -95,7 +95,7 @@ export default function SwapPage() {
             <div className="space-y-2 p-3 bg-secondary rounded-lg text-sm">
               <div className="flex justify-between">
                 <span>Price Impact</span>
-                <span className="text-viper-green">~0.1%</span>
+                <span className="text-primary">~0.1%</span>
               </div>
               <div className="flex justify-between">
                 <span>Protocol Fee</span>
@@ -110,7 +110,6 @@ export default function SwapPage() {
 
           {/* Swap Button */}
           <Button
-            variant="viper"
             className="w-full"
             onClick={handleSwap}
             disabled={!tokenIn || !tokenOut || !amountIn || isSwapping}

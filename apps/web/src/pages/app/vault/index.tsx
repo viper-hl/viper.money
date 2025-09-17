@@ -25,7 +25,7 @@ export default function VaultPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <TrendingUp className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">8.5%</div>
             <div className="text-sm text-muted-foreground">Current APR</div>
           </CardContent>
@@ -33,7 +33,7 @@ export default function VaultPage() {
 
         <Card>
           <CardContent className="p-4 text-center">
-            <Coins className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <Coins className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">1.2M</div>
             <div className="text-sm text-muted-foreground">Total HYPE</div>
           </CardContent>
@@ -41,7 +41,7 @@ export default function VaultPage() {
 
         <Card>
           <CardContent className="p-4 text-center">
-            <Users className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <Users className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">543</div>
             <div className="text-sm text-muted-foreground">Stakers</div>
           </CardContent>
@@ -49,7 +49,7 @@ export default function VaultPage() {
 
         <Card>
           <CardContent className="p-4 text-center">
-            <BarChart3 className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">98.2%</div>
             <div className="text-sm text-muted-foreground">Utilization</div>
           </CardContent>
@@ -88,9 +88,7 @@ export default function VaultPage() {
               </div>
             </div>
 
-            <Button variant="viper" className="w-full">
-              Stake HYPE
-            </Button>
+            <Button className="w-full">Stake HYPE</Button>
           </CardContent>
         </Card>
 
@@ -125,7 +123,7 @@ export default function VaultPage() {
               </div>
             </div>
 
-            <Button variant="viper-outline" className="w-full">
+            <Button variant="outline" className="w-full">
               Unstake stHYPE
             </Button>
           </CardContent>
@@ -143,17 +141,15 @@ export default function VaultPage() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="text-center p-4 bg-secondary rounded-lg">
-              <div className="text-2xl font-bold text-viper-green">0.0</div>
+              <div className="text-2xl font-bold text-primary">0.0</div>
               <div className="text-sm text-muted-foreground">Pending HYPE</div>
             </div>
             <div className="text-center p-4 bg-secondary rounded-lg">
-              <div className="text-2xl font-bold text-viper-green">0.0</div>
+              <div className="text-2xl font-bold text-primary">0.0</div>
               <div className="text-sm text-muted-foreground">Swap Fees</div>
             </div>
             <div className="flex items-center">
-              <Button variant="viper" className="w-full">
-                Claim All Rewards
-              </Button>
+              <Button className="w-full">Claim All Rewards</Button>
             </div>
           </div>
         </CardContent>
@@ -166,7 +162,7 @@ export default function VaultPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 bg-viper-green rounded-full mt-2"></div>
+            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
             <div>
               <div className="font-medium">Hyper Staking Reward</div>
               <div className="text-sm text-muted-foreground">
@@ -175,7 +171,7 @@ export default function VaultPage() {
             </div>
           </div>
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 bg-viper-green rounded-full mt-2"></div>
+            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
             <div>
               <div className="font-medium">Swap Execution Fee</div>
               <div className="text-sm text-muted-foreground">
@@ -184,7 +180,7 @@ export default function VaultPage() {
             </div>
           </div>
           <div className="flex items-start space-x-3">
-            <div className="w-2 h-2 bg-viper-green rounded-full mt-2"></div>
+            <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
             <div>
               <div className="font-medium">Maker Rebate</div>
               <div className="text-sm text-muted-foreground">

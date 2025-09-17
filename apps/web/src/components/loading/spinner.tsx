@@ -29,7 +29,7 @@ export function LoadingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-2">
-        <Spinner size="lg" className="text-viper-green" />
+        <Spinner size="lg" className="text-primary" />
         <p className="text-sm text-muted-foreground">로딩중...</p>
       </div>
     </div>

@@ -21,8 +21,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={darkTheme({
-            accentColor: "#4EF08A", // viper 네온 그린
-            accentColorForeground: "black",
+            accentColor: "hsl(154 88% 62%)", // primary 색상 사용
+            accentColorForeground: "hsl(240 5.9% 10%)",
             borderRadius: "medium",
           })}
         >

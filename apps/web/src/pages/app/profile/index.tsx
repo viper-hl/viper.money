@@ -13,7 +13,7 @@ export default function ProfilePage() {
             지갑별 참여 이력과 보상 내역을 확인하세요
           </p>
         </div>
-        <Button variant="viper-outline">Connect Wallet</Button>
+        <Button variant="outline">Connect Wallet</Button>
       </div>
 
       {/* Wallet Info */}
@@ -42,7 +42,7 @@ export default function ProfilePage() {
       <div className="grid md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <TrendingUp className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <TrendingUp className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">$0</div>
             <div className="text-sm text-muted-foreground">Total Volume</div>
           </CardContent>
@@ -50,7 +50,7 @@ export default function ProfilePage() {
 
         <Card>
           <CardContent className="p-4 text-center">
-            <History className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <History className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">0</div>
             <div className="text-sm text-muted-foreground">Total Swaps</div>
           </CardContent>
@@ -58,7 +58,7 @@ export default function ProfilePage() {
 
         <Card>
           <CardContent className="p-4 text-center">
-            <Award className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <Award className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">$0</div>
             <div className="text-sm text-muted-foreground">Total Rewards</div>
           </CardContent>
@@ -66,7 +66,7 @@ export default function ProfilePage() {
 
         <Card>
           <CardContent className="p-4 text-center">
-            <Wallet className="h-8 w-8 text-viper-green mx-auto mb-2" />
+            <Wallet className="h-8 w-8 text-primary mx-auto mb-2" />
             <div className="text-2xl font-bold">0</div>
             <div className="text-sm text-muted-foreground">stHYPE Balance</div>
           </CardContent>
@@ -118,10 +118,8 @@ export default function ProfilePage() {
               Start using Viper to earn rewards from swap fees and staking
             </p>
             <div className="flex gap-2 justify-center">
-              <Button variant="viper" size="sm">
-                Start Swapping
-              </Button>
-              <Button variant="viper-outline" size="sm">
+              <Button size="sm">Start Swapping</Button>
+              <Button variant="outline" size="sm">
                 Join Vault
               </Button>
             </div>

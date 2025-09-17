@@ -8,8 +8,7 @@ export default function LandingPage() {
     <main className="container mx-auto px-4 py-20">
       <div className="text-center max-w-4xl mx-auto">
         <h1 className="text-6xl font-bold text-white mb-6">
-          <span className="text-viper-green">Better Prices</span> for
-          Aggregators
+          <span className="text-primary">Better Prices</span> for Aggregators
         </h1>
         <p className="text-xl text-gray-300 mb-8 leading-relaxed">
           Providing Router/Wrapper + Core Swap Agent to enable EVM DEX
@@ -21,7 +20,7 @@ export default function LandingPage() {
         {/* Feature Cards */}
         <div className="grid md:grid-cols-3 gap-6 text-left">
           <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800">
-            <h3 className="text-xl font-semibold text-viper-green mb-3">
+            <h3 className="text-xl font-semibold text-primary mb-3">
               Better Pricing
             </h3>
             <p className="text-gray-300">
@@ -31,7 +30,7 @@ export default function LandingPage() {
           </div>
 
           <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800">
-            <h3 className="text-xl font-semibold text-viper-green mb-3">
+            <h3 className="text-xl font-semibold text-primary mb-3">
               Accessibility
             </h3>
             <p className="text-gray-300">
@@ -40,7 +39,7 @@ export default function LandingPage() {
           </div>
 
           <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800">
-            <h3 className="text-xl font-semibold text-viper-green mb-3">
+            <h3 className="text-xl font-semibold text-primary mb-3">
               Transparency
             </h3>
             <p className="text-gray-300">

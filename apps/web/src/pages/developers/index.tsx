@@ -40,19 +40,19 @@ export default function DevelopersPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="bg-secondary p-4 rounded-lg font-mono text-sm overflow-x-auto">
-            <div className="text-viper-green">// Get Quote</div>
+            <div className="text-primary">// Get Quote</div>
             <div>
               const quote = await viper.getQuote(tokenIn, tokenOut, amountIn)
             </div>
             <br />
-            <div className="text-viper-green">// Execute Swap</div>
+            <div className="text-primary">// Execute Swap</div>
             <div>
               const result = await viper.swapExactIn(quote.id, amountIn, minOut,
               receiver)
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="viper">
+            <Button>
               <Code className="h-4 w-4 mr-2" />
               View Full Docs
             </Button>
@@ -68,7 +68,7 @@ export default function DevelopersPage() {
       <div className="grid md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <Shield className="h-8 w-8 text-viper-green mb-2" />
+            <Shield className="h-8 w-8 text-primary mb-2" />
             <CardTitle>안전하고 신뢰할 수 있는</CardTitle>
             <CardDescription>
               Quote 만료 시간, 슬리피지 보호, 부분 체결 정책으로 안전한 거래
@@ -79,7 +79,7 @@ export default function DevelopersPage() {
 
         <Card>
           <CardHeader>
-            <Zap className="h-8 w-8 text-viper-green mb-2" />
+            <Zap className="h-8 w-8 text-primary mb-2" />
             <CardTitle>간단한 통합</CardTitle>
             <CardDescription>
               표준 인터페이스로 기존 Aggregator에 쉽게 추가 가능
@@ -89,7 +89,7 @@ export default function DevelopersPage() {
 
         <Card>
           <CardHeader>
-            <Activity className="h-8 w-8 text-viper-green mb-2" />
+            <Activity className="h-8 w-8 text-primary mb-2" />
             <CardTitle>실시간 모니터링</CardTitle>
             <CardDescription>
               상태 페이지, 헬스체크, 메트릭으로 시스템 상태 투명하게 공개
@@ -107,7 +107,7 @@ export default function DevelopersPage() {
         <CardContent className="space-y-6">
           {/* getQuote */}
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-viper-green">getQuote</h3>
+            <h3 className="text-lg font-semibold text-primary">getQuote</h3>
             <div className="bg-secondary p-4 rounded-lg font-mono text-sm">
               <div className="text-muted-foreground">function</div>
               <div>
@@ -127,9 +127,7 @@ export default function DevelopersPage() {
 
           {/* swapExactIn */}
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-viper-green">
-              swapExactIn
-            </h3>
+            <h3 className="text-lg font-semibold text-primary">swapExactIn</h3>
             <div className="bg-secondary p-4 rounded-lg font-mono text-sm">
               <div className="text-muted-foreground">function</div>
               <div>
@@ -206,21 +204,21 @@ export default function DevelopersPage() {
             <div className="flex items-center justify-between">
               <span>Router Contract</span>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-viper-green rounded-full"></div>
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <span className="text-sm">Operational</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <span>Quote Service</span>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-viper-green rounded-full"></div>
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <span className="text-sm">Operational</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <span>Execution Engine</span>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-viper-green rounded-full"></div>
+                <div className="w-2 h-2 bg-primary rounded-full"></div>
                 <span className="text-sm">Operational</span>
               </div>
             </div>
