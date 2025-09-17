@@ -79,43 +79,28 @@ cp apps/web/.env.example apps/web/.env
 
 ```env
 # 서버
-NODE_ENV=development
+# JWT Configuration
+JWT_SECRET=
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=
+DB_PASSWORD=
+DB_DATABASE=viper
+
+# Server Configuration
 PORT=4000
+NODE_ENV=development
 
-# DB 접속(둘 중 하나 방식 사용)
-DATABASE_URL=postgresql://viper_user:your_password@localhost:5432/viper
-# 또는 TypeORM 개별 설정 사용 시:
-# DB_HOST=localhost
-# DB_PORT=5432
-# DB_USER=viper_user
-# DB_PASS=your_password
-# DB_NAME=viper
-
-# HyperEVM / Router
-HYPER_EVM_RPC_URL=https://<your-hyperevm-rpc>
-ROUTER_ADDRESS=0xYourRouterAddress    # 배포 후 입력
-VAULT_ADDRESS=0xYourVaultAddress      # (선택) 배포 후 입력
-EXECUTOR_PRIVATE_KEY=0x...            # 실행/서명용(보관 주의)
-
-# Quote/실행 파라미터(예시 기본값)
-QUOTE_TTL_MS=3000                     # quote 유효시간(ms)
-DEFAULT_SLIPPAGE_BPS=50               # 0.50%
-MAX_IMPACT_BPS=100                    # 1.00% (체결 충격 상한)
-ALLOW_PARTIAL_FILL=false
-PAIR_ALLOWLIST=USDC,BTC,ETH           # 지원 페어 토큰 심볼(예시)
-
-# Swagger
-SWAGGER_ENABLE=true
+# Next.js App URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 **`apps/web/.env`**
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
-NEXT_PUBLIC_CHAIN_ID=XXXX            # HyperEVM 체인ID (배포 후 기입)
-NEXT_PUBLIC_ROUTER_ADDRESS=0xYourRouterAddress
-# (선택) WalletConnect/Wagmi 등 사용 시
-# NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
+VITE_API_SERVER_URL=http://localhost:4000
 ```
 
 #### 의존성 설치 & 빌드
@@ -136,7 +121,7 @@ pnpm --filter web build
 pnpm dev
 # 또는
 pnpm --filter api dev    # 포트 4000
-pnpm --filter web dev    # 포트 3000
+pnpm --filter web dev    # 포트 5173 (Vite 기본값)
 ```
 
 #### 프로덕션 모드
@@ -183,9 +168,9 @@ viper.money/
 │   ├── api/                    # NestJS 백엔드 (Quote Cache/Orchestrator/Indexer)
 │   │   ├── src/
 │   │   └── package.json
-│   └── web/                    # Next.js 프론트엔드 (Landing/Swap/Vault/Profile/Developers)
-│       ├── app/
-│       ├── components/
+│   └── web/                    # React 프론트엔드 (Landing/Swap/Vault/Profile/Developers)
+│       ├── src/
+│       ├── public/
 │       └── package.json
 ├── packages/
 │   ├── ui/                     # 공통 UI 컴포넌트 (shadcn/ui)
@@ -255,9 +240,13 @@ function swapExactIn(
 import { Contract, Wallet, JsonRpcProvider } from "ethers";
 import RouterABI from "./abi/ViperRouter.json";
 
-const provider = new JsonRpcProvider(process.env.HYPER_EVM_RPC_URL!);
-const signer = new Wallet(process.env.EXECUTOR_PRIVATE_KEY!, provider);
-const router = new Contract(process.env.ROUTER_ADDRESS!, RouterABI, signer);
+const provider = new JsonRpcProvider(import.meta.env.VITE_HYPER_EVM_RPC_URL!);
+const signer = new Wallet(import.meta.env.VITE_EXECUTOR_PRIVATE_KEY!, provider);
+const router = new Contract(
+  import.meta.env.VITE_ROUTER_ADDRESS!,
+  RouterABI,
+  signer
+);
 
 const amountIn = BigInt("1000000"); // 1e6(토큰 소수점 기준 예시)
 const q = await router.getQuote(tokenIn, tokenOut, amountIn);
@@ -270,7 +259,7 @@ const tx = await router.swapExactIn(
   amountIn,
   minOut,
   receiver,
-  false,
+  false
 );
 const rc = await tx.wait();
 console.log("SwapExecuted:", rc?.transactionHash);
@@ -294,7 +283,7 @@ console.log("SwapExecuted:", rc?.transactionHash);
 
 **Frontend**
 
-- Next.js 15(App Router), Tailwind CSS 4, shadcn/ui
+- React 18, Tailwind CSS 4, shadcn/ui
 - Zustand(전역 상태), TanStack Query(서버 상태), Axios
 
 **Backend**

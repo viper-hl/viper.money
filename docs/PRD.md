@@ -158,7 +158,7 @@
 
 ## 6. 기술 스택 (유지 + 보완)
 
-- **Frontend**: Next.js, Tailwind CSS 4, shadcn, Zustand, TanStack Query, Axios
+- **Frontend**: React, Tailwind CSS 4, shadcn, Zustand, TanStack Query, Axios
 - **Backend**: Nest.js (Quote Cache, Orchestrator, Indexer API)
 - **DB**: PostgreSQL 17 (스왑, quote, 분배, 재고, 이벤트 인덱스)
 - **Blockchain**: **HyperEVM + corewriter 연동 컨트랙트**, HyperCore 계정(서브어카운트)
