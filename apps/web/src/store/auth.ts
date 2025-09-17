@@ -1,77 +1,54 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { create } from 'zustand'
+import { devtools, persist } from 'zustand/middleware'
 
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-  avatar?: string;
+export interface AuthState {
+  // 사용자 정보
+  user: {
+    address: string
+    isConnected: boolean
+    chainId: number | null
+  } | null
+
+  // 인증 상태
+  isAuthenticated: boolean
+  isConnecting: boolean
+
+  // 액션들
+  setUser: (user: AuthState['user']) => void
+  setIsAuthenticated: (auth: boolean) => void
+  setIsConnecting: (connecting: boolean) => void
+  logout: () => void
 }
 
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
+export const useAuthStore = create<AuthState>()(
+  devtools(
+    persist(
+      (set) => ({
+        // 초기값들
+        user: null,
+        isAuthenticated: false,
+        isConnecting: false,
 
-interface AuthActions {
-  login: (user: User, token: string) => void;
-  logout: () => void;
-  setLoading: (loading: boolean) => void;
-  updateUser: (user: Partial<User>) => void;
-}
-
-export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set, get) => ({
-      // State
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-
-      // Actions
-      login: (user, token) => {
-        localStorage.setItem("auth_token", token);
-        set({
-          user,
-          token,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      },
-
-      logout: () => {
-        localStorage.removeItem("auth_token");
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-      },
-
-      setLoading: (loading) => {
-        set({ isLoading: loading });
-      },
-
-      updateUser: (userData) => {
-        const currentUser = get().user;
-        if (currentUser) {
+        // 액션들
+        setUser: (user) => set({ user }),
+        setIsAuthenticated: (auth) => set({ isAuthenticated: auth }),
+        setIsConnecting: (connecting) => set({ isConnecting: connecting }),
+        logout: () => {
           set({
-            user: { ...currentUser, ...userData },
-          });
-        }
-      },
-    }),
-    {
-      name: "auth-storage",
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
+            user: null,
+            isAuthenticated: false,
+            isConnecting: false,
+          })
+        },
       }),
+      {
+        name: 'auth-store',
+        // user 정보만 persist (보안상 중요한 정보는 제외)
+        partialize: (state) => ({ user: state.user }),
+      }
+    ),
+    {
+      name: 'auth-store',
     }
   )
-);
+)

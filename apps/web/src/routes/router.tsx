@@ -1,43 +1,52 @@
 import { createBrowserRouter } from "react-router";
 import { lazy } from "react";
 import { AppLayout } from "@/components/layout/app-layout";
-import Landing from "@/pages/home";
-import NotFound from "@/pages/notFound";
 
-const Swap = lazy(() => import("@/pages/app/swap"));
-const Vault = lazy(() => import("@/pages/app/vault"));
-const Profile = lazy(() => import("@/pages/app/profile"));
-const Developers = lazy(() => import("@/pages/developers"));
+// 페이지 컴포넌트들 (Lazy Loading)
+import LandingPage from "@/pages/landing";
+import NotFoundPage from "@/pages/notFound";
+const SwapPage = lazy(() => import("@/pages/app/swap"));
+const VaultPage = lazy(() => import("@/pages/app/vault"));
+const ProfilePage = lazy(() => import("@/pages/app/profile"));
+const DevelopersPage = lazy(() => import("@/pages/developers"));
 
+// 라우터 설정
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Landing,
-  },
-  {
-    path: "developers",
-    Component: Developers,
-  },
-  {
-    path: "app",
     element: <AppLayout />,
+    errorElement: <NotFoundPage />,
     children: [
       {
-        path: "swap",
-        Component: Swap,
+        index: true,
+        element: <LandingPage />,
       },
       {
-        path: "vault",
-        Component: Vault,
+        path: "developers",
+        element: <DevelopersPage />,
       },
       {
-        path: "profile",
-        Component: Profile,
+        path: "app",
+        element: <AppLayout />,
+        children: [
+          {
+            path: "swap",
+            element: <SwapPage />,
+          },
+          {
+            path: "vault",
+            element: <VaultPage />,
+          },
+          {
+            path: "profile",
+            element: <ProfilePage />,
+          },
+        ],
       },
     ],
   },
   {
     path: "*",
-    Component: NotFound,
+    element: <NotFoundPage />,
   },
 ]);

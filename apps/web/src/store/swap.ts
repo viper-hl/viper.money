@@ -1,62 +1,80 @@
-import { create } from "zustand";
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
 
-interface SwapState {
-  fromToken: string;
-  toToken: string;
-  fromAmount: string;
-  toAmount: string;
-  slippage: number;
-  isSwapping: boolean;
-  lastSwapHash?: string;
+export interface SwapState {
+  // 스왑 입력 상태
+  tokenIn: string | null
+  tokenOut: string | null
+  amountIn: string
+  amountOut: string
+
+  // 슬리피지 설정
+  slippageTolerance: number // bps 단위
+
+  // Quote 정보
+  currentQuote: {
+    amountOut: string
+    feeBps: number
+    validUntil: number
+    quoteId: string
+  } | null
+
+  // 액션들
+  setTokenIn: (token: string | null) => void
+  setTokenOut: (token: string | null) => void
+  setAmountIn: (amount: string) => void
+  setAmountOut: (amount: string) => void
+  setSlippageTolerance: (slippage: number) => void
+  setCurrentQuote: (quote: SwapState['currentQuote']) => void
+  
+  // 유틸리티 액션들
+  swapTokens: () => void // tokenIn과 tokenOut 교체
+  resetSwap: () => void // 모든 상태 초기화
 }
 
-interface SwapActions {
-  setFromToken: (token: string) => void;
-  setToToken: (token: string) => void;
-  setFromAmount: (amount: string) => void;
-  setToAmount: (amount: string) => void;
-  setSlippage: (slippage: number) => void;
-  swapTokens: () => void;
-  setSwapping: (isSwapping: boolean) => void;
-  setLastSwapHash: (hash: string) => void;
-  resetSwap: () => void;
-}
+export const useSwapStore = create<SwapState>()(
+  devtools(
+    (set, get) => ({
+      // 초기값들
+      tokenIn: null,
+      tokenOut: null,
+      amountIn: '',
+      amountOut: '',
+      slippageTolerance: 50, // 0.5%
+      currentQuote: null,
 
-export const useSwapStore = create<SwapState & SwapActions>((set, get) => ({
-  // State
-  fromToken: "USDC",
-  toToken: "BTC",
-  fromAmount: "",
-  toAmount: "",
-  slippage: 0.5, // 0.5%
-  isSwapping: false,
-  lastSwapHash: undefined,
+      // 액션들
+      setTokenIn: (token) => set({ tokenIn: token }),
+      setTokenOut: (token) => set({ tokenOut: token }),
+      setAmountIn: (amount) => set({ amountIn: amount }),
+      setAmountOut: (amount) => set({ amountOut: amount }),
+      setSlippageTolerance: (slippage) => set({ slippageTolerance: slippage }),
+      setCurrentQuote: (quote) => set({ currentQuote: quote }),
 
-  // Actions
-  setFromToken: (token) => set({ fromToken: token }),
-  setToToken: (token) => set({ toToken: token }),
-  setFromAmount: (amount) => set({ fromAmount: amount }),
-  setToAmount: (amount) => set({ toAmount: amount }),
-  setSlippage: (slippage) => set({ slippage }),
+      // 유틸리티 액션들
+      swapTokens: () => {
+        const { tokenIn, tokenOut } = get()
+        set({
+          tokenIn: tokenOut,
+          tokenOut: tokenIn,
+          amountIn: '',
+          amountOut: '',
+          currentQuote: null,
+        })
+      },
 
-  swapTokens: () => {
-    const { fromToken, toToken, fromAmount, toAmount } = get();
-    set({
-      fromToken: toToken,
-      toToken: fromToken,
-      fromAmount: toAmount,
-      toAmount: fromAmount,
-    });
-  },
-
-  setSwapping: (isSwapping) => set({ isSwapping }),
-  setLastSwapHash: (hash) => set({ lastSwapHash: hash }),
-
-  resetSwap: () =>
-    set({
-      fromAmount: "",
-      toAmount: "",
-      isSwapping: false,
-      lastSwapHash: undefined,
+      resetSwap: () => {
+        set({
+          tokenIn: null,
+          tokenOut: null,
+          amountIn: '',
+          amountOut: '',
+          currentQuote: null,
+        })
+      },
     }),
-}));
+    {
+      name: 'swap-store',
+    }
+  )
+)

@@ -1,66 +1,41 @@
-import { create } from "zustand";
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
 
-interface UIState {
-  theme: "light" | "dark";
-  sidebarOpen: boolean;
-  loading: boolean;
-  notifications: Notification[];
+export interface UIState {
+  // 전역 로딩 상태
+  isLoading: boolean
+  setIsLoading: (loading: boolean) => void
+
+  // 모달 상태
+  isWalletModalOpen: boolean
+  setIsWalletModalOpen: (open: boolean) => void
+
+  // 테마 관련
+  theme: 'light' | 'dark' | 'system'
+  setTheme: (theme: 'light' | 'dark' | 'system') => void
+
+  // 사이드바 상태 (모바일)
+  isSidebarOpen: boolean
+  setIsSidebarOpen: (open: boolean) => void
 }
 
-interface Notification {
-  id: string;
-  type: "success" | "error" | "warning" | "info";
-  title: string;
-  message?: string;
-  duration?: number;
-}
+export const useUIStore = create<UIState>()(
+  devtools(
+    (set) => ({
+      // 초기값들
+      isLoading: false,
+      isWalletModalOpen: false,
+      theme: 'dark',
+      isSidebarOpen: false,
 
-interface UIActions {
-  setTheme: (theme: "light" | "dark") => void;
-  toggleSidebar: () => void;
-  setSidebarOpen: (open: boolean) => void;
-  setLoading: (loading: boolean) => void;
-  addNotification: (notification: Omit<Notification, "id">) => void;
-  removeNotification: (id: string) => void;
-  clearNotifications: () => void;
-}
-
-export const useUIStore = create<UIState & UIActions>((set, get) => ({
-  // State
-  theme: "dark",
-  sidebarOpen: false,
-  loading: false,
-  notifications: [],
-
-  // Actions
-  setTheme: (theme) => set({ theme }),
-
-  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-  setSidebarOpen: (open) => set({ sidebarOpen: open }),
-
-  setLoading: (loading) => set({ loading }),
-
-  addNotification: (notification) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newNotification = { ...notification, id };
-
-    set((state) => ({
-      notifications: [...state.notifications, newNotification],
-    }));
-
-    // 자동 제거 (기본 5초)
-    const duration = notification.duration || 5000;
-    if (duration > 0) {
-      setTimeout(() => {
-        get().removeNotification(id);
-      }, duration);
+      // 액션들
+      setIsLoading: (loading) => set({ isLoading: loading }),
+      setIsWalletModalOpen: (open) => set({ isWalletModalOpen: open }),
+      setTheme: (theme) => set({ theme }),
+      setIsSidebarOpen: (open) => set({ isSidebarOpen: open }),
+    }),
+    {
+      name: 'ui-store',
     }
-  },
-
-  removeNotification: (id) =>
-    set((state) => ({
-      notifications: state.notifications.filter((n) => n.id !== id),
-    })),
-
-  clearNotifications: () => set({ notifications: [] }),
-}));
+  )
+)

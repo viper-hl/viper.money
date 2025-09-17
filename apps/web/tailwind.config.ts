@@ -1,8 +1,12 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  darkMode: ["class"],
-  content: ["./src/**/*.{ts,tsx}", "./index.html"],
-  prefix: "",
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./index.html",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "../../packages/ui/src/components/**/*.{ts,tsx}",
+  ],
+  darkMode: "class",
   theme: {
     container: {
       center: true,
@@ -13,6 +17,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        // 기본 shadcn 색상들
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -46,17 +51,34 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+        chart: {
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
+        },
         // Viper Brand Colors
         viper: {
           green: {
-            DEFAULT: "hsl(var(--viper-green))", // #4EF08A
-            dark: "hsl(var(--viper-green-dark))",
-            light: "hsl(var(--viper-green-light))",
+            DEFAULT: "#4EF08A", // 네온 그린 (메인 컬러)
+            dark: "#3DD174",
+            light: "#6EF5A0",
           },
           bg: {
-            primary: "hsl(var(--viper-bg-primary))",
-            secondary: "hsl(var(--viper-bg-secondary))",
-            tertiary: "hsl(var(--viper-bg-tertiary))",
+            primary: "#0F0F23",
+            secondary: "#1E1E3F",
+            tertiary: "#2A2A5C",
           },
         },
       },
@@ -66,19 +88,10 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
         "viper-glow": {
-          "0%, 100%": { boxShadow: "0 0 5px hsl(var(--viper-green))" },
+          "0%, 100%": { boxShadow: "0 0 5px #4EF08A" },
           "50%": {
-            boxShadow:
-              "0 0 20px hsl(var(--viper-green)), 0 0 30px hsl(var(--viper-green))",
+            boxShadow: "0 0 20px #4EF08A, 0 0 30px #4EF08A",
           },
         },
         "viper-pulse": {
@@ -91,13 +104,12 @@ module.exports = {
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
         "viper-glow": "viper-glow 2s ease-in-out infinite",
         "viper-pulse": "viper-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "slide-in": "slide-in 0.3s ease-out",
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
 };
+
+export default config;

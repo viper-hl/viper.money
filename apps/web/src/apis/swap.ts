@@ -1,132 +1,75 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type CommonResType } from "./index";
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { api } from './index'
 
-// 스왑 관련 타입 정의
-export interface SwapQuote {
-  fromToken: string;
-  toToken: string;
-  fromAmount: string;
-  toAmount: string;
-  rate: string;
-  priceImpact: string;
-  fee: string;
-  source: "hyperliquid" | "uniswap" | "1inch";
-  savings?: string;
+// 타입 정의들
+export interface QuoteRequest {
+  tokenIn: string
+  tokenOut: string
+  amountIn: string
+}
+
+export interface QuoteResponse {
+  amountOut: string
+  feeBps: number
+  validUntil: number
+  quoteId: string
 }
 
 export interface SwapRequest {
-  fromToken: string;
-  toToken: string;
-  fromAmount: string;
-  slippage?: number;
+  quoteId: string
+  amountIn: string
+  minAmountOut: string
+  receiver: string
+  allowPartialFill: boolean
 }
 
-export interface SwapTransaction {
-  id: string;
-  fromToken: string;
-  toToken: string;
-  fromAmount: string;
-  toAmount: string;
-  timestamp: string;
-  txHash?: string;
-  status: "pending" | "completed" | "failed";
-  savings?: string;
+export interface SwapResponse {
+  amountOut: string
+  txHash: string
 }
 
-// 스왑 견적 조회
-export function useSwapQuote(request: SwapRequest | null) {
+// Quote API
+export const swapAPI = {
+  // Quote 요청
+  getQuote: (params: QuoteRequest): Promise<QuoteResponse> =>
+    api.get('/swap/quote', params),
+
+  // Swap 실행
+  executeSwap: (data: SwapRequest): Promise<SwapResponse> =>
+    api.post('/swap/execute', data),
+
+  // 지원되는 토큰 목록
+  getSupportedTokens: (): Promise<Array<{
+    address: string
+    symbol: string
+    name: string
+    decimals: number
+    logoURI?: string
+  }>> =>
+    api.get('/swap/tokens'),
+}
+
+// React Query Hooks
+export function useGetQuote(params: QuoteRequest, enabled = true) {
   return useQuery({
-    queryKey: ["swap-quote", request],
-    queryFn: async () => {
-      const response = await api.get<CommonResType<SwapQuote>>(
-        `/swap/quote`,
-        request as any
-      );
-      return response.data.data!;
-    },
-    enabled:
-      !!request &&
-      !!request.fromToken &&
-      !!request.toToken &&
-      !!request.fromAmount,
-    staleTime: 1000 * 30, // 30초
-    gcTime: 1000 * 60, // 1분
-  });
+    queryKey: ['quote', params],
+    queryFn: () => swapAPI.getQuote(params),
+    enabled: enabled && !!params.tokenIn && !!params.tokenOut && !!params.amountIn,
+    staleTime: 1000, // 1초 후 stale
+    gcTime: 5000, // 5초 후 garbage collect
+  })
 }
 
-// 여러 소스의 가격 비교
-export function useSwapComparison(request: SwapRequest | null) {
-  return useQuery({
-    queryKey: ["swap-comparison", request],
-    queryFn: async () => {
-      const response = await api.get<CommonResType<SwapQuote[]>>(
-        `/swap/compare`,
-        request as any
-      );
-      return response.data.data!;
-    },
-    enabled:
-      !!request &&
-      !!request.fromToken &&
-      !!request.toToken &&
-      !!request.fromAmount,
-    staleTime: 1000 * 30, // 30초
-    gcTime: 1000 * 60, // 1분
-  });
-}
-
-// 스왑 실행
-export function useSwapExecute() {
-  const queryClient = useQueryClient();
-
+export function useExecuteSwap() {
   return useMutation({
-    mutationFn: async (request: SwapRequest) => {
-      const response = await api.post<CommonResType<SwapTransaction>>(
-        "/swap/execute",
-        request
-      );
-      return response.data.data!;
-    },
-    onSuccess: () => {
-      // 스왑 후 관련 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ["swap-history"] });
-      queryClient.invalidateQueries({ queryKey: ["wallet-balance"] });
-    },
-  });
+    mutationFn: swapAPI.executeSwap,
+  })
 }
 
-// 스왑 히스토리 조회
-export function useSwapHistory() {
+export function useSupportedTokens() {
   return useQuery({
-    queryKey: ["swap-history"],
-    queryFn: async () => {
-      const response =
-        await api.get<CommonResType<SwapTransaction[]>>("/swap/history");
-      return response.data.data!;
-    },
-    staleTime: 1000 * 60 * 2, // 2분
-    gcTime: 1000 * 60 * 5, // 5분
-  });
-}
-
-// 토큰 목록 조회
-export function useTokenList() {
-  return useQuery({
-    queryKey: ["token-list"],
-    queryFn: async () => {
-      const response = await api.get<
-        CommonResType<
-          Array<{
-            symbol: string;
-            name: string;
-            address: string;
-            decimals: number;
-          }>
-        >
-      >("/tokens");
-      return response.data.data!;
-    },
-    staleTime: 1000 * 60 * 10, // 10분
-    gcTime: 1000 * 60 * 30, // 30분
-  });
+    queryKey: ['supportedTokens'],
+    queryFn: swapAPI.getSupportedTokens,
+    staleTime: 1000 * 60 * 5, // 5분
+  })
 }
