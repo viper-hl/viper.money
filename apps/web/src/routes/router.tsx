@@ -27,7 +27,6 @@ export const router = createBrowserRouter([
       },
       {
         path: "app",
-        element: <AppLayout />,
         children: [
           {
             path: "swap",

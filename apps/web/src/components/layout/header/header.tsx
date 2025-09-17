@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { cn } from "@/lib/utils";
 
@@ -10,11 +10,13 @@ const navItems = [
 ];
 
 export function Header() {
+  const location = useLocation();
+
   return (
-    <header className="border-b border-gray-800">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-800 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-[#4EF08A] to-green-400 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-r from-viper-green to-green-400 rounded-full flex items-center justify-center">
             🐍
           </div>
           <span className="text-xl font-bold text-white">viper</span>
