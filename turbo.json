@@ -3,17 +3,71 @@
   "ui": "stream",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "artifacts/**",
+        "cache/**",
+        "typechain-types/**"
+      ]
+    },
+    "compile": {
+      "dependsOn": [
+        "^compile"
+      ],
+      "inputs": [
+        "contracts/**/*.sol",
+        "hardhat.config.ts"
+      ],
+      "outputs": [
+        "artifacts/**",
+        "cache/**",
+        "typechain-types/**"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "compile"
+      ],
+      "inputs": [
+        "contracts/**/*.sol",
+        "test/**/*.ts",
+        "hardhat.config.ts"
+      ],
+      "outputs": [
+        "coverage/**",
+        "coverage.json",
+        "gas-report.txt"
+      ]
+    },
+    "deploy": {
+      "dependsOn": [
+        "compile"
+      ],
+      "cache": false
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": [
+        "^check-types"
+      ]
     },
     "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "node": {
       "cache": false,
       "persistent": true
     }
