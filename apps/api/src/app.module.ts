@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { PassportModule } from '@nestjs/passport';
+import { HyperliquidModule } from './hyperliquid/hyperliquid.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PassportModule } from '@nestjs/passport';
     AuthModule,
     UsersModule,
     TenantsModule,
+    HyperliquidModule,
   ],
   controllers: [],
   providers: [],
