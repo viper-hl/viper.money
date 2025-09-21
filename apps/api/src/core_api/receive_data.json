@@ -1,0 +1,24 @@
+{
+    "channel": "userNonFundingLedgerUpdates",
+    "data": {
+      "user": "0xe7ccbc9ce50dbcc4656a441dca4e3039b5db59b3",
+      "nonFundingLedgerUpdates": [
+        {
+          "time": 1758361725415,
+          "hash": "0xd94c3f18d82d7490dac5042be813cb02027300fe732093627d14ea6b97214e7b",
+          "delta": {
+            "type": "spotTransfer",
+            "token": "USDC",
+            "amount": "13.0",
+            "usdcValue": "13.0",
+            "user": "0x4e5ad93d5b73d2f3821960778a61eea2df408632",
+            "destination": "0xe7ccbc9ce50dbcc4656a441dca4e3039b5db59b3",
+            "fee": "0.0",
+            "nativeTokenFee": "0.0",
+            "nonce": 1758361637784,
+            "feeToken": ""
+          }
+        }
+      ]
+    }
+  }
