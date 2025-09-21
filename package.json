@@ -7,6 +7,10 @@
     "dev": "turbo dev",
     "dev:api": "turbo dev --filter=api",
     "dev:web": "turbo dev --filter=web",
+    "dev:contracts": "turbo dev --filter=@viper/contracts",
+    "test:contracts": "turbo test --filter=@viper/contracts",
+    "compile:contracts": "turbo compile --filter=@viper/contracts",
+    "deploy:contracts": "turbo deploy --filter=@viper/contracts",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
